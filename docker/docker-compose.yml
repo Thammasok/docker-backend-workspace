@@ -1,0 +1,63 @@
+version: "3.7"
+
+services:
+
+  web:
+    image: nginx:1.21.5
+    ports:
+      - 80:80
+    volumes:
+      - /var/www/docker-study.loc/docker-backend-workspace/php:/var/www/myapp
+      - /var/www/docker-study.loc/docker-backend-workspace/docker/site.conf:/etc/nginx/conf.d/site.conf
+    depends_on:
+      - php
+      - mariadb
+
+  php:
+    image: php:7.4-fpm
+    volumes:
+      - /var/www/docker-study.loc/docker-backend-workspace/php:/var/www/myapp
+      - /var/www/docker-study.loc/docker-backend-workspace/docker/php.ini:/usr/local/etc/php/php.ini
+    depends_on:
+      - mariadb
+
+  mariadb:
+    image: mariadb:10.7
+    restart: always
+    command: "mysqld --init-file /data/application/init.sql"
+    volumes:
+      - mariadb-radis-data:/var/lib/mysql
+      - ./init.sql:/data/application/init.sql
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD:-qwerty}
+
+  phpmyadmin:
+    image: phpmyadmin:latest
+    ports:
+      - 8000:80
+    environment:
+      - PMA_ARBITRARY=1
+      - PMA_HOST=mariadb
+    depends_on:
+      - mariadb
+
+  redis:
+    image: redis:latest
+    ports:
+      - 6379:6379
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - mariadb-radis-data:/data
+
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    environment:
+      - REDIS_HOSTS=local:redis:6379
+      - HTTP_USER=${REDIS_USER:-admin}
+      - HTTP_PASSWORD=${REDIS_PASSWORD:-qwerty}
+    ports:
+      - 8081:8081
+    depends_on:
+      - redis
+volumes:
+  mariadb-radis-data:
