@@ -17,5 +17,8 @@ cd docker-backend-workspace/docker
 2. Run Docker Compose
 ```
 docker-compose up -d
+```
+3. Stop Docker Compose
+```
 docker-compose down -v
 ```
