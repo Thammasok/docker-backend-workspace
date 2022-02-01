@@ -23,7 +23,7 @@ services:
 
   mariadb:
     image: mariadb:10.7
-    restart: always
+    # restart: always
     command: "mysqld --init-file /data/application/init.sql"
     volumes:
       - mariadb-radis-data:/var/lib/mysql
